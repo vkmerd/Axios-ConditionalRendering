@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Container,
   FormControl,
@@ -12,13 +12,17 @@ import {
   Table,
   TableHead,
   TableBody,
+  Button,
 } from '@mui/material';
 import { footBallFetchData, dummyJsonApi } from './api/Api';
+import {renderFootballData} from './components/Football';
+import {renderDummyData} from './components/Football';
 
 const ApiDataForm: React.FC = () => {
   const [selectedApi, setSelectedApi] = useState<string>('');
   const [apiData, setApiData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const tableRef = useRef<HTMLTableElement>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,7 +36,7 @@ const ApiDataForm: React.FC = () => {
         }
         setApiData(data);
       } catch (error) {
-        console.error('Hata:', error);
+        console.error('Error:', error);
       } finally {
         setLoading(false);
       }
@@ -47,12 +51,21 @@ const ApiDataForm: React.FC = () => {
     setSelectedApi(event.target.value as string);
   };
 
+  const changeTableColor = () => {
+    if (tableRef.current) {
+      tableRef.current.style.backgroundColor = '#f0f0f0';
+    }
+  };
+
+ 
+
+
   const renderFootballData = () => {
-    const footballData = Array.isArray(apiData.data) ? apiData.data : [apiData];
+    const footballData = Array.isArray(apiData?.data) ? apiData.data : [apiData];
 
     return (
       <TableContainer>
-        <Table>
+        <Table ref={tableRef}>
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
@@ -62,7 +75,7 @@ const ApiDataForm: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {footballData.map((footBallApiData, index) => (
+            {footballData.map((footBallApiData: any, index: number) => (
               <TableRow key={index}>
                 <TableCell component="th" scope="row">
                   {footBallApiData.name}
@@ -79,35 +92,34 @@ const ApiDataForm: React.FC = () => {
   };
 
   const renderDummyData = () => {
-    if (!apiData || !apiData.carts || !Array.isArray(apiData.carts[0].products)) {
+    if (!apiData || !apiData.carts) {
       return <div>No data available</div>;
     }
 
     const dummyData = apiData.carts;
-    console.log(dummyData);
-    
-
     return (
       <TableContainer>
-        <Table>
+        <Table ref={tableRef}>
           <TableHead>
             <TableRow>
               <TableCell>Product</TableCell>
               <TableCell align="right">Price</TableCell>
-              <TableCell align="right">Total Product</TableCell>
+              <TableCell align="right">Total Quantity</TableCell>
               <TableCell align="right">Discounted Total</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {dummyData.map((dummyApiData, index) => (
-              <TableRow key={index}>
-                <TableCell component="th" scope="row">
-                  {dummyApiData.title}
-                </TableCell>
-                <TableCell align="right">{dummyApiData.price}</TableCell>
-                <TableCell align="right">{dummyApiData.total}</TableCell>
-                <TableCell align="right">{dummyApiData.discountedTotal}</TableCell>
-              </TableRow>
+            {dummyData.map((cart: any, index: number) => (
+              cart.products.map((product: any, productIndex: number) => (
+                <TableRow key={`${index}-${productIndex}`}>
+                  <TableCell component="th" scope="row">
+                    {product.title}
+                  </TableCell>
+                  <TableCell align="right">{product.price}</TableCell>
+                  <TableCell align="right">{product.quantity}</TableCell>
+                  <TableCell align="right">{product.discountedTotal}</TableCell>
+                </TableRow>
+              ))
             ))}
           </TableBody>
         </Table>
@@ -115,6 +127,7 @@ const ApiDataForm: React.FC = () => {
     );
   };
 
+  
   const renderData = () => {
     if (selectedApi === 'football' && apiData) {
       return renderFootballData();
@@ -139,6 +152,10 @@ const ApiDataForm: React.FC = () => {
           <MenuItem value="dummy">Dummy API</MenuItem>
         </Select>
       </FormControl>
+
+      <Button variant="contained" color="primary" onClick={changeTableColor}>
+        Tablo Rengini Değiştir
+      </Button>
 
       {loading ? (
         <CircularProgress />

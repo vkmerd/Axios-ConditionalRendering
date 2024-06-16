@@ -33,16 +33,15 @@ export const footBallFetchData = async (): Promise<void> => {
   }
 };
 
-export const dummyJsonApi = async (): Promise<void> => {
-  try {
-    const data = await dummyFetchApi();
-    if (data) {
-      console.log(data);
-    }
-  } catch (error) {
-    console.error('Hata:', error);
+export const dummyJsonApi = async ()=> {
+  const response = await fetch('https://dummyjson.com/carts');
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
   }
+  const data = await response.json();
+  return data;
 };
+
 
 footBallFetchData();
 dummyJsonApi();
