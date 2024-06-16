@@ -27,6 +27,7 @@ export const footBallFetchData = async (): Promise<void> => {
     const response = await footBallApi.get('');
     const data = response.data;
     console.log(data);
+    return data;
   } catch (error) {
     console.error('Football API hata:', (error as Error).message);
   }
